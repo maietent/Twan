@@ -640,27 +640,48 @@ static long vdestroy_partition(struct vregs *vregs)
     return vteardown(vid);
 }
 
-/* long VFRAME_INSERT(u32 physical_processor_id, u32 frame_id, 
-                      u8 vid, u32 processor_id) */
-static long vframe_insert(struct vregs *vregs)
+/* long VFRAME_SET(u8 vid, u32 processor_id, u32 frame_id) */
+static long vframe_set(struct vregs *vregs)
 {
+    vcurrent_vcpu_enable_preemption();
+
 #if !CONFIG_TWANVISOR_VSCHED_MCFS
     return -EINVAL;
 #else
 
-    return 0;
+    u8 vid = vregs->regs.rdi & 0xff;
+    u32 processor_id = vregs->regs.rsi & 0xffffffff;
+    u32 frame_id = vregs->regs.rdx & 0xffffffff;
+
+    struct vcpu *vcpu = vcurrent_vcpu();
+    if (!vcpu->root)
+        return -EPERM;
+
+    return vemu_vframe_set(vid, processor_id, frame_id);
 
 #endif
 }
 
-/* long VFRAME_REMOVE(u32 physical_processor_id, u32 frame_id) */
-static long vframe_remove(struct vregs *vregs)
+/* long VFRAME_UNSET(int physical_processor_id, u32 frame_id) */
+static long vframe_unset(struct vregs *vregs)
 {
+    vcurrent_vcpu_enable_preemption();
+
 #if !CONFIG_TWANVISOR_VSCHED_MCFS
     return -EINVAL;
 #else
 
-    return 0;
+    int phys_processor_id = vregs->regs.rdi & 0xffffffff;
+    u32 frame_id = vregs->regs.rsi & 0xffffffff;
+
+    if (phys_processor_id < 0)
+        phys_processor_id = vthis_vprocessor_id();
+
+    struct vcpu *vcpu = vcurrent_vcpu();
+    if (!vcpu->root)
+        return -EPERM;
+
+    return vemu_vframe_unset(phys_processor_id, frame_id);
 
 #endif
 }
@@ -709,8 +730,8 @@ static vcall_func_t vcall_table[] = {
     [VCREATE_PARTITION] = vcreate_partition,
     [VDESTROY_PARTITION] = vdestroy_partition,
 
-    [VFRAME_INSERT] = vframe_insert,
-    [VFRAME_REMOVE] = vframe_remove,
+    [VFRAME_SET] = vframe_set,
+    [VFRAME_UNSET] = vframe_unset,
 };
 
 void vcall_dispatcher(struct vregs *vregs)

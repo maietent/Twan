@@ -632,4 +632,11 @@ void __vemu_pv_spin_kick(struct vcpu *vcpu);
 int vemu_pv_spin_kick_local(u32 processor_id);
 int vemu_pv_spin_kick_far(u8 target_vid, u32 processor_id);
 
+#if CONFIG_TWANVISOR_VSCHED_MCFS
+
+int vemu_vframe_set(u8 vid, u32 processor_id, u32 frame_id);
+int vemu_vframe_unset(u32 physical_processor_id, u32 frame_id);
+
+#endif
+
 #endif

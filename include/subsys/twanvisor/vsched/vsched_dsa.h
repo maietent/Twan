@@ -17,6 +17,7 @@ struct vscheduler
 
 #if CONFIG_TWANVISOR_VSCHED_MCFS
     struct vcpu *frames[CONFIG_TWANVISOR_VSCHED_NUM_FRAMES];
+    u32 clock;
 #endif
 
     u8 vcriticality_level;
@@ -27,12 +28,20 @@ struct vscheduler
 
 STATIC_ASSERT(CONFIG_TWANVISOR_VSCHED_MCQS + CONFIG_TWANVISOR_VSCHED_MCFS == 1);
 
+#if CONFIG_TWANVISOR_VSCHED_MCQS
+
 struct dq *__vsched_get_bucket(u8 *criticality);
 void __vsched_push(struct vcpu *vcpu);
+void __vsched_push_paused(struct vcpu *vcpu);
+
+#endif
+
 struct vcpu *__vsched_pop(void);
 void __vsched_dequeue(struct vcpu *vcpu);
 
-void __vsched_push_paused(struct vcpu *vcpu);
 void __vsched_dequeue_paused(struct vcpu *vcpu);
+void __vsched_unpause(struct vcpu *vcpu);
+
+void __vsched_update_criticality(struct vcpu *vcpu, u8 criticality);
 
 #endif
