@@ -640,14 +640,12 @@ static long vdestroy_partition(struct vregs *vregs)
     return vteardown(vid);
 }
 
+#if CONFIG_TWANVISOR_VSCHED_MCFS
+
 /* long VFRAME_SET(u8 vid, u32 processor_id, u32 frame_id) */
 static long vframe_set(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
-
-#if !CONFIG_TWANVISOR_VSCHED_MCFS
-    return -EINVAL;
-#else
 
     u8 vid = vregs->regs.rdi & 0xff;
     u32 processor_id = vregs->regs.rsi & 0xffffffff;
@@ -658,18 +656,12 @@ static long vframe_set(struct vregs *vregs)
         return -EPERM;
 
     return vemu_vframe_set(vid, processor_id, frame_id);
-
-#endif
 }
 
 /* long VFRAME_UNSET(int physical_processor_id, u32 frame_id) */
 static long vframe_unset(struct vregs *vregs)
 {
     vcurrent_vcpu_enable_preemption();
-
-#if !CONFIG_TWANVISOR_VSCHED_MCFS
-    return -EINVAL;
-#else
 
     int phys_processor_id = vregs->regs.rdi & 0xffffffff;
     u32 frame_id = vregs->regs.rsi & 0xffffffff;
@@ -682,9 +674,25 @@ static long vframe_unset(struct vregs *vregs)
         return -EPERM;
 
     return vemu_vframe_unset(phys_processor_id, frame_id);
+}
+
+#else
+
+/* long VFRAME_SET(u8 vid, u32 processor_id, u32 frame_id) */
+static long vframe_set(__unused struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+    return -EINVAL;
+}
+
+/* long VFRAME_UNSET(int physical_processor_id, u32 frame_id) */
+static long vframe_unset(__unused struct vregs *vregs)
+{
+    vcurrent_vcpu_enable_preemption();
+    return -EINVAL;
+}
 
 #endif
-}
 
 static vcall_func_t vcall_table[] = {
 
