@@ -1,7 +1,7 @@
 #include <generated/autoconf.h>
 #if CONFIG_SUBSYS_TWANVISOR
 
-#include <subsys/twanvisor/vemulate/vcalls.h>
+#include <subsys/twanvisor/vportal/vcalls.h>
 #include <subsys/twanvisor/vemulate/vemulate_utils.h>
 #include <subsys/twanvisor/vsched/vsched_yield.h>
 #include <subsys/twanvisor/vportal/vrecovery.h>
