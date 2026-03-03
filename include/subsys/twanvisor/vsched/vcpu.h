@@ -55,8 +55,9 @@ typedef union
     } fields;
 } vcpu_flags_t;
 
-typedef void (*vput_callback_func_t)(void);
-typedef void (*vset_callback_func_t)(void);
+struct vcpu;
+typedef void (*vput_callback_func_t)(struct vcpu *vcpu);
+typedef void (*vset_callback_func_t)(struct vcpu *vcpu);
 
 /* worth noting that root currently doesnt use msr load save area, devs should
    disallow access to msr's used by root */
