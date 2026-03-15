@@ -164,6 +164,7 @@ void __venter(void)
             if (vis_in_nmi() || state == VINJECT_NMI) {
 
                 vset_nmi_window_exiting(true);
+                vset_int_window_exiting(false);
                 state = VINJECT_WAITING;
 
             } else if (vis_external_interrupts_blocked() || 
