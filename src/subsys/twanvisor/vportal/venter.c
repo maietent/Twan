@@ -160,7 +160,8 @@ void __venter(void)
         int pending_intl = vector_to_intl(pending_vector);
         if (pending_intl > serviced_intl && pending_intl >= current_intl) {
 
-            if (vis_in_nmi() || state == VINJECTED_NMI) {
+            if (vis_in_nmi() || state == VINJECTED_NMI || 
+                state == VNMI_WINDOW_EXITING) {
 
                 state = VNMI_WINDOW_EXITING;
 
@@ -182,8 +183,6 @@ void __venter(void)
     }
 
     vmcs_unlock_isr_restore(&current->visr_pending.lock, &pending_node);
-
-    /* when we are no longer using interrupt windows, we can disable them */
 
     vset_nmi_window_exiting(state == VNMI_WINDOW_EXITING);
     vset_int_window_exiting(state == VINT_WINDOW_EXITING);
